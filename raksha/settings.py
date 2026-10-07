@@ -18,10 +18,19 @@ def load_env_file() -> None:
 
 load_env_file()
 
+
+def database_url(value: str) -> str:
+    if value.startswith("postgresql://"):
+        return "postgresql+psycopg://" + value[len("postgresql://") :]
+    if value.startswith("postgres://"):
+        return "postgresql+psycopg://" + value[len("postgres://") :]
+    return value
+
+
 SECRET_KEY = os.environ.get("SECRET_KEY") or "dev-only-not-for-production"
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+pysqlite:///raksha.sqlite3")
+DATABASE_URL = database_url(os.environ.get("DATABASE_URL", "sqlite+pysqlite:///raksha.sqlite3"))
 ACCESS_TOKEN_TTL_SECONDS = int(os.environ.get("ACCESS_TOKEN_TTL_SECONDS", "900"))
 REFRESH_TOKEN_TTL_SECONDS = int(os.environ.get("REFRESH_TOKEN_TTL_SECONDS", "604800"))
 CORS_ALLOWED_ORIGINS = [item.strip() for item in os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",") if item.strip()]

@@ -35,7 +35,7 @@ class TenantConfigurationView(BaseAPIView):
     def get(self, request, tenant_id):
         if not (request.principal.allows("tenant.manage") or request.principal.allows("user.manage")):
             self.ensure("tenant.manage")
-        return respond(request, reads.get_configuration(request.db, request.principal, tenant_id))
+        return respond(request, records.get_configuration(request.db, request.principal, tenant_id))
 
     def put(self, request, tenant_id):
         if not (request.principal.allows("tenant.manage") or request.principal.allows("user.manage")):

@@ -2,29 +2,29 @@
 
 District-level emergency shelter coordination API. Routes are class-based REST under `/api/v1/`.
 
-Open a terminal in this folder (`raksha-setu-server`) before you run the commands below. Use PowerShell.
+## Quick Start
 
-## Start the application
+### Prerequisites
+- Python 3.11+
+- Git
 
-Use this every time, after the one-time setup.
+Open a terminal in this folder (`raksha-setu-server`). The commands below are for Windows Command Prompt, the same form as `venv\Scripts\activate`.
 
-```powershell
-.\.venv\Scripts\python manage.py runserver 8000
+### 1. Setup Environment
+```bat
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
-Leave that window open. The API is at http://127.0.0.1:8000. API docs are at http://127.0.0.1:8000/api/v1/docs.
+The prompt starts with `(.venv)` when activation worked. Run the remaining commands in that same window.
 
-Stop it with Ctrl+C in that window.
+### 2. Install Dependencies
+```bat
+pip install -r requirements.txt
+```
 
-Start this server before the UI. The UI calls http://localhost:8000.
-
-## One-time setup
-
-You need Python 3.11 or newer.
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python -m pip install -r requirements.txt
+### 3. Setup Environment File
+```bat
 copy .env.example .env
 ```
 
@@ -38,13 +38,53 @@ SEED_PASSWORD=choose-a-password
 
 `SEED_PASSWORD` must be at least 8 characters. That value is the password for every seeded account.
 
-Create the pilot district, shelters, and users once:
-
-```powershell
-.\.venv\Scripts\python manage.py seed
+### 4. Setup Database
+```bat
+alembic current
+alembic upgrade head
+alembic current
 ```
 
-When that prints that the pilot data is ready, go back to **Start the application**. Running `seed` again is safe; it will not create a second copy.
+`alembic current` is the status check. Before the upgrade it may be empty. After `alembic upgrade head`, `current` should match `alembic heads`.
+
+Create the pilot district, shelters, and users once:
+
+```bat
+python manage.py seed
+```
+
+Running `seed` again is safe. It will not create a second copy.
+
+### 5. Start Server
+```bat
+python manage.py runserver 8000
+```
+
+Leave this window open. Stop the server with Ctrl+C.
+
+### 6. Access API
+- **API**: http://127.0.0.1:8000
+- **Docs**: http://127.0.0.1:8000/api/v1/docs
+
+Start this server before the UI. The UI calls http://localhost:8000.
+
+## Regular Use
+
+Do this every time you want the API running. Steps 1 to 4 above are already done.
+
+```bat
+.venv\Scripts\activate
+alembic current
+alembic upgrade head
+alembic current
+python manage.py runserver 8000
+```
+
+In a second window, confirm the server is answering. A status code of `200` means it is up.
+
+```bat
+curl http://127.0.0.1:8000/api/v1/docs
+```
 
 ## Sign-in accounts
 
@@ -61,21 +101,31 @@ Use these usernames in the UI. The password is the `SEED_PASSWORD` you set in `.
 
 `admin` is a district officer who can also register shelters, manage users, and save warning configuration.
 
-## Tests
+## Database
 
-```powershell
-.\.venv\Scripts\python -m pytest
+```bat
+alembic current
+alembic heads
+alembic upgrade head
+```
+
+`alembic current` prints the revision already applied. `alembic heads` prints the latest revision in this repo.
+
+## Testing
+
+```bat
+pytest
 ```
 
 ## Optional: PostgreSQL
 
 Use this only if you want PostgreSQL instead of the SQLite file. Docker must be running. In `.env`, set `DATABASE_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` to the same database name and password, then:
 
-```powershell
+```bat
 docker compose up -d
-.\.venv\Scripts\python -m alembic upgrade head
-.\.venv\Scripts\python manage.py seed
-.\.venv\Scripts\python manage.py runserver 8000
+alembic upgrade head
+python manage.py seed
+python manage.py runserver 8000
 ```
 
 Shortage thresholds, capacity thresholds, and priority weights stay empty until an administrator saves them. The API does not invent those values.

@@ -1,3 +1,9 @@
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "raksha.settings")
+
 from logging.config import fileConfig
 
 from alembic import context
@@ -5,12 +11,6 @@ from sqlalchemy import engine_from_config, pool
 
 from common.db.base import Base
 from common.persistence import ensure_models
-
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "raksha.settings")
 
 import django
 
@@ -23,7 +23,7 @@ if config.config_file_name is not None:
 
 from django.conf import settings
 
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 target_metadata = Base.metadata
 
 

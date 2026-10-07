@@ -146,7 +146,6 @@ def submit_from_channel(session, tenant_id, shelter: Shelter, normalized: dict, 
 
     class _System:
         role = "district_officer"
-        tenant_id = tenant_id
         user_id = None
         shelter_id = None
         block_id = None
@@ -160,5 +159,6 @@ def submit_from_channel(session, tenant_id, shelter: Shelter, normalized: dict, 
     data.resources = [SimpleNamespace(**item) for item in normalized["resources"]]
     principal = _System()
     principal.tenant_id = shelter.tenant_id
+    principal.allows("report.submit")
     data.channel = normalized["channel"]
     return submit(session, principal, data, request_id, channel=normalized["channel"])

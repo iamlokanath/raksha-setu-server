@@ -1080,6 +1080,34 @@ def test_remaining_branches(client):
     assert by_shelter["meta"]["total"] >= 1
 
 
+def test_manage_and_migrations(monkeypatch, capsys):
+    import runpy
+    import sys
+
+    from alembic import command
+    from alembic.config import Config
+
+    argv = sys.argv
+    monkeypatch.setattr(sys, "argv", ["manage.py", "check"])
+    try:
+        runpy.run_path("manage.py", run_name="__main__")
+    finally:
+        sys.argv = argv
+
+    configured = Config("alembic.ini")
+    command.upgrade(configured, "head", sql=True)
+    command.downgrade(configured, "001_initial:base", sql=True)
+    captured = capsys.readouterr()
+    assert "CREATE TABLE" in captured.out
+    assert "DROP TABLE" in captured.out
+
+    bare = Config()
+    bare.set_main_option("script_location", "migrations")
+    bare.set_main_option("sqlalchemy.url", "sqlite://")
+    command.upgrade(bare, "head")
+    command.downgrade(bare, "base")
+
+
 def test_schema_objects_cover_remaining_validators():
     with pytest.raises(ValueError):
         UserCreate(name="A", username="a", password="password-1", role="block_officer", organization="Org", shelter_id=str(uuid.uuid4()))
